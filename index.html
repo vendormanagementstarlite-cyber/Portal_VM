@@ -28,10 +28,9 @@ a{text-decoration:none}
 .r4{animation:fadeUp .8s cubic-bezier(.2,.7,.2,1) .42s backwards}
 .r5{animation:fadeUp .8s cubic-bezier(.2,.7,.2,1) .54s backwards}
 .nav a{transition:color .2s ease, background .2s ease}
-.nav a:hover,.nav a:focus-visible{background:rgba(255,255,255,.14);color:#ffffff}
+.nav a:focus-visible{background:rgba(255,255,255,.14);color:#ffffff}
 .nav a:focus-visible,.chip:focus-visible{outline:3px solid #ffffff;outline-offset:2px}
 .chip{transition:transform .2s ease, background .2s ease, color .2s ease}
-.chip:hover{transform:translateY(-2px)}
 .search{transition:box-shadow .25s ease, background .25s ease}
 .search::placeholder{color:#5b6b7a}
 .search:focus{outline:none;background:#ffffff;box-shadow:0 0 0 4px rgba(255,255,255,.35),0 18px 40px rgba(0,0,0,.35)}
@@ -39,29 +38,61 @@ a{text-decoration:none}
 .card:nth-child(1){animation-delay:.1s}.card:nth-child(2){animation-delay:.17s}.card:nth-child(3){animation-delay:.24s}.card:nth-child(4){animation-delay:.31s}
 .card::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--accent),#ff8fbf);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}
 .card::before{content:"";position:absolute;top:0;left:0;width:35%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);transform:translateX(-120%) skewX(-18deg);pointer-events:none}
-.card:hover,.card:focus-visible{transform:translateY(-8px);box-shadow:0 26px 50px rgba(8,38,58,.2);border-color:transparent !important}
-.card:hover::after,.card:focus-visible::after{transform:scaleX(1)}
-.card:hover::before,.card:focus-visible::before{animation:sheen 1s ease}
+.card:focus-visible{transform:translateY(-8px);box-shadow:0 26px 50px rgba(8,38,58,.2);border-color:transparent !important}
+.card:focus-visible::after{transform:scaleX(1)}
+.card:focus-visible::before{animation:sheen 1s ease}
 .card:focus-visible{outline:3px solid #0a2f45;outline-offset:3px}
 .card .ico{transition:transform .4s cubic-bezier(.3,1.6,.5,1), background .3s ease}
-.card:hover .ico,.card:focus-visible .ico{transform:scale(1.1) rotate(-6deg);background:linear-gradient(135deg,var(--accent),#ff6aa5) !important}
+.card:focus-visible .ico{transform:scale(1.1) rotate(-6deg);background:linear-gradient(135deg,var(--accent),#ff6aa5) !important}
 .card .cta{transition:color .2s ease}
-.card:hover .cta,.card:focus-visible .cta{color:var(--accent)}
+.card:focus-visible .cta{color:var(--accent)}
 .card .arrow{display:inline-block;transition:transform .25s ease}
-.card:hover .arrow,.card:focus-visible .arrow{transform:translateX(6px)}
+.card:focus-visible .arrow{transform:translateX(6px)}
 @media (prefers-reduced-motion: reduce){.bgvid,.orbA,.orbB,.dot,.topbar,.r1,.r2,.r3,.r4,.r5,.card{animation:none !important}.card,.card .ico,.card::after,.chip{transition:none}}
 
 .chip{cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;padding:10px 20px;border-radius:999px;min-height:44px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
 html{scroll-behavior:smooth}
+
+@media (hover:hover){
+.nav a:hover{background:rgba(255,255,255,.14);color:#ffffff}
+.chip:hover{transform:translateY(-2px)}
+.card:hover{transform:translateY(-8px);box-shadow:0 26px 50px rgba(8,38,58,.2);border-color:transparent !important}
+.card:hover::after{transform:scaleX(1)}
+.card:hover::before{animation:sheen 1s ease}
+.card:hover .ico{transform:scale(1.1) rotate(-6deg);background:linear-gradient(135deg,var(--accent),#ff6aa5) !important}
+.card:hover .cta{color:var(--accent)}
+.card:hover .arrow{transform:translateX(6px)}
+}
+
+.card:active{transform:scale(.985)}
+@media (max-width:600px){
+.hero{padding:0 20px 110px !important}
+.topbar{padding:18px 0 !important}
+.nav{width:100%}
+.nav a{padding:12px 14px !important;font-size:13.5px !important}
+.herotext{padding:34px 0 0 !important}
+.hero h1{font-size:36px !important;letter-spacing:-1px !important;margin-top:18px !important}
+.hero p.r3{font-size:15.5px !important;margin-top:14px !important}
+.searchwrap{margin-top:26px !important}
+.searchwrap input{height:54px !important}
+.chip{padding:10px 14px !important;font-size:13px !important}
+.bgvid{left:60% !important;top:0 !important;height:118% !important}
+.veil{background:linear-gradient(180deg,rgba(5,13,18,.62),rgba(5,13,18,.74)) !important}
+.main{padding:0 16px 48px !important}
+.main section{margin-bottom:32px !important}
+.main h2{font-size:19px !important}
+.card{min-height:0 !important;padding:18px !important;gap:14px !important;border-radius:16px !important}
+.card .ico{width:48px !important;height:48px !important}
+}
 </style>
 </head>
 <body>
 <div style="--accent: #e11d74; background: #f2f6f9; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0a2f45">
 
-<div style="position: relative; overflow: hidden; background: #050d12; padding: 0 24px 150px">
+<div class="hero" style="position: relative; overflow: hidden; background: #050d12; padding: 0 24px 150px">
 <video class="bgvid" src="assets/hero-bg.mp4" autoplay muted loop playsinline aria-hidden="true" tabindex="-1" style="position: absolute; top: -2%; left: 72%; transform: translateX(-50%); height: 156%; max-height: 1280px; aspect-ratio: 9 / 16; object-fit: cover; -webkit-mask-image: linear-gradient(to right, transparent, #000 24%, #000 76%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 82%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent, #000 24%, #000 76%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 82%, transparent); mask-composite: intersect"></video>
-<div aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(120deg, rgba(5,13,18,0.82) 0%, rgba(10,47,69,0.5) 50%, rgba(15,92,115,0.28) 100%)"></div>
+<div class="veil" aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(120deg, rgba(5,13,18,0.82) 0%, rgba(10,47,69,0.5) 50%, rgba(15,92,115,0.28) 100%)"></div>
 <div class="orbA" aria-hidden="true" style="position: absolute; top: -140px; left: -120px; width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(circle, rgba(27,133,127,0.55), transparent 68%); filter: blur(30px)"></div>
 <div class="orbB" aria-hidden="true" style="position: absolute; bottom: -80px; right: -100px; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle, rgba(225,29,116,0.32), transparent 68%); filter: blur(34px)"></div>
 <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; background: linear-gradient(to bottom, rgba(242,246,249,0), #f2f6f9)"></div>
@@ -82,7 +113,7 @@ html{scroll-behavior:smooth}
 </nav>
 </div>
 
-<div style="text-align: center; padding: 64px 0 0">
+<div class="herotext" style="text-align: center; padding: 64px 0 0">
 <div class="r1" style="display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22); font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: #ffffff">
 <span class="dot" style="width: 8px; height: 8px; border-radius: 50%; background: #4fe3c1"></span>
 <span>PORTAL TERPADU STARLITE</span>
@@ -106,7 +137,7 @@ html{scroll-behavior:smooth}
 </div>
 </div>
 
-<div style="max-width: 1120px; margin: 0 auto; padding: 8px 24px 72px">
+<div class="main" style="max-width: 1120px; margin: 0 auto; padding: 8px 24px 72px">
 
 <section id="dashboard" style="display: block; margin: 0 0 48px; scroll-margin-top: 20px">
 <div style="display: flex; align-items: center; gap: 14px; margin: 0 0 22px">
