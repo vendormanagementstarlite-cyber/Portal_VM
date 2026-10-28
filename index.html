@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal Dasboard VM · Starlite</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.mp{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:50;display:flex;flex-direction:column;align-items:flex-end;gap:12px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+.mp-fab{width:58px;height:58px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,#0a2f45,#1b857f);box-shadow:0 12px 30px rgba(5,13,18,.45);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:transform .2s ease,box-shadow .2s ease}
+.mp-fab:hover{transform:translateY(-3px) scale(1.05)}
+.mp-fab:focus-visible,.mp button:focus-visible,.mp input:focus-visible{outline:3px solid #ffffff;outline-offset:2px}
+.eq{display:flex;align-items:flex-end;gap:3px;height:20px}
+.eq i{display:block;width:4px;height:6px;border-radius:2px;background:#fff;transform-origin:bottom}
+.mp.playing .eq i{animation:eq .9s ease-in-out infinite alternate}
+.mp.playing .eq i:nth-child(2){animation-delay:.2s;animation-duration:.7s}
+.mp.playing .eq i:nth-child(3){animation-delay:.4s;animation-duration:1.1s}
+.mp.playing .eq i:nth-child(4){animation-delay:.1s;animation-duration:.8s}
+@keyframes eq{from{height:5px}to{height:20px}}
+.mp-panel{width:min(330px,calc(100vw - 32px));box-sizing:border-box;padding:14px;border-radius:20px;background:rgba(8,32,47,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.16);box-shadow:0 24px 60px rgba(0,0,0,.45);color:#fff;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(14px) scale(.97);transform-origin:bottom right;transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
+.mp.open .mp-panel{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .25s ease,transform .25s ease}
+.mp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;font-weight:700;letter-spacing:2px;color:#b9ccd6}
+.mp-x{width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#fff;font-size:20px;line-height:1;cursor:pointer}
+.mp-video{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.mp-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
+.mp-title{margin:12px 2px 2px;font-size:14px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mp-note{margin:4px 2px 0;font-size:12px;color:#ffb4d4;min-height:0}
+.mp-time{display:flex;justify-content:space-between;font-size:11.5px;color:#b9ccd6;margin:2px 2px 0}
+.mp input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;margin:6px 0 0;background:transparent;cursor:pointer;accent-color:#e11d74}
+.mp input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:rgba(255,255,255,.28)}
+.mp input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5px;border-radius:50%;background:#fff;border:0}
+.mp input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:rgba(255,255,255,.28)}
+.mp input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#fff;border:0}
+.mp-ctrl{display:flex;align-items:center;justify-content:center;gap:12px;margin:8px 0 4px}
+.mp-ctrl button{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:background .2s ease,transform .15s ease}
+.mp-ctrl button:hover{background:rgba(255,255,255,.22)}
+.mp-ctrl .mp-play{width:54px;height:54px;background:#e11d74}
+.mp-ctrl .mp-play:hover{background:#c4155f}
+.mp-vol{display:flex;align-items:center;gap:10px;margin:4px 2px 0;color:#b9ccd6}
+.mp-list{list-style:none;margin:10px 0 0;padding:8px 0 0;border-top:1px solid rgba(255,255,255,.14);max-height:150px;overflow:auto}
+.mp-list button{display:flex;gap:10px;align-items:center;width:100%;min-height:44px;padding:6px 8px;border:0;border-radius:10px;background:transparent;color:#e3eef2;font:inherit;font-size:13px;font-weight:600;text-align:left;cursor:pointer}
+.mp-list button:hover{background:rgba(255,255,255,.1)}
+.mp-list button[aria-current="true"]{background:rgba(225,29,116,.22);color:#fff}
+.mp-list b{flex:none;width:20px;color:#ff9cc6}
+.mp-list span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:600px){.mp{right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px))}}
+@media (prefers-reduced-motion: reduce){.mp.playing .eq i{animation:none;height:14px}}
+a{text-decoration:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@keyframes drift{from{transform:scale(1.04)}to{transform:scale(1.14)}}
+@keyframes floatA{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.15)}}
+@keyframes floatB{from{transform:translate(0,0) scale(1.1)}to{transform:translate(-70px,-30px) scale(.95)}}
+@keyframes sheen{from{transform:translateX(-120%) skewX(-18deg)}to{transform:translateX(420%) skewX(-18deg)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(1.5)}}
+.bgvid{}
+.orbA{animation:floatA 14s ease-in-out infinite alternate}
+.orbB{animation:floatB 17s ease-in-out infinite alternate}
+.dot{animation:pulse 2s ease-in-out infinite}
+.topbar{animation:fadeDown .7s cubic-bezier(.2,.7,.2,1) backwards}
+.r1{animation:fadeUp .8s cubic-bezier(.2,.7,.2,1) .05s backwards}
+.r2{animation:fadeUp .8s cubic-bezier(.2,.7,.2,1) .18s backwards}
+.r3{animation:fadeUp .8s cubic-bezier(.2,.7,.2,1) .3s backwards}
+.r4{animation:fadeUp .8s cubic-bezier(.2,.7,.2,1) .42s backwards}
+.r5{animation:fadeUp .8s cubic-bezier(.2,.7,.2,1) .54s backwards}
+.nav a{transition:color .2s ease, background .2s ease}
+.nav a:focus-visible{background:rgba(255,255,255,.14);color:#ffffff}
+.nav a:focus-visible,.chip:focus-visible{outline:3px solid #ffffff;outline-offset:2px}
+.chip{transition:transform .2s ease, background .2s ease, color .2s ease}
+.search{transition:box-shadow .25s ease, background .25s ease}
+.search::placeholder{color:#5b6b7a}
+.search:focus{outline:none;background:#ffffff;box-shadow:0 0 0 4px rgba(255,255,255,.35),0 18px 40px rgba(0,0,0,.35)}
+.card{animation:fadeUp .7s cubic-bezier(.2,.7,.2,1) backwards;transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease}
+.card:nth-child(1){animation-delay:.1s}.card:nth-child(2){animation-delay:.17s}.card:nth-child(3){animation-delay:.24s}.card:nth-child(4){animation-delay:.31s}
+.card::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--accent),#ff8fbf);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}
+.card::before{content:"";position:absolute;top:0;left:0;width:35%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);transform:translateX(-120%) skewX(-18deg);pointer-events:none}
+.card:focus-visible{transform:translateY(-8px);box-shadow:0 26px 50px rgba(8,38,58,.2);border-color:transparent !important}
+.card:focus-visible::after{transform:scaleX(1)}
+.card:focus-visible::before{animation:sheen 1s ease}
+.card:focus-visible{outline:3px solid #0a2f45;outline-offset:3px}
+.card .ico{transition:transform .4s cubic-bezier(.3,1.6,.5,1), background .3s ease}
+.card:focus-visible .ico{transform:scale(1.1) rotate(-6deg);background:linear-gradient(135deg,var(--accent),#ff6aa5) !important}
+.card .cta{transition:color .2s ease}
+.card:focus-visible .cta{color:var(--accent)}
+.card .arrow{display:inline-block;transition:transform .25s ease}
+.card:focus-visible .arrow{transform:translateX(6px)}
+@media (prefers-reduced-motion: reduce){.bgvid,.orbA,.orbB,.dot,.topbar,.r1,.r2,.r3,.r4,.r5,.card{animation:none !important}.card,.card .ico,.card::after,.chip{transition:none}}
+
+.chip{cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;padding:10px 20px;border-radius:999px;min-height:44px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+html{scroll-behavior:smooth}
+
+@media (hover:hover){
+.nav a:hover{background:rgba(255,255,255,.14);color:#ffffff}
+.chip:hover{transform:translateY(-2px)}
+.card:hover{transform:translateY(-8px);box-shadow:0 26px 50px rgba(8,38,58,.2);border-color:transparent !important}
+.card:hover::after{transform:scaleX(1)}
+.card:hover::before{animation:sheen 1s ease}
+.card:hover .ico{transform:scale(1.1) rotate(-6deg);background:linear-gradient(135deg,var(--accent),#ff6aa5) !important}
+.card:hover .cta{color:var(--accent)}
+.card:hover .arrow{transform:translateX(6px)}
+}
+
+.card:active{transform:scale(.985)}
+@media (max-width:600px){
+.hero{padding:0 20px 110px !important}
+.topbar{padding:18px 0 !important}
+.nav{width:100%}
+.nav a{padding:12px 14px !important;font-size:13.5px !important}
+.herotext{padding:34px 0 0 !important}
+.hero h1{font-size:36px !important;letter-spacing:-1px !important;margin-top:18px !important}
+.hero p.r3{font-size:15.5px !important;margin-top:14px !important}
+.searchwrap{margin-top:26px !important}
+.searchwrap input{height:54px !important}
+.chip{padding:10px 14px !important;font-size:13px !important}
+.bgvid{left:60% !important;top:0 !important;height:118% !important}
+.veil{background:linear-gradient(180deg,rgba(5,13,18,.62),rgba(5,13,18,.74)) !important}
+.main{padding:0 16px 48px !important}
+.main section{margin-bottom:32px !important}
+.main h2{font-size:19px !important}
+.card{min-height:0 !important;padding:18px !important;gap:14px !important;border-radius:16px !important}
+.card .ico{width:48px !important;height:48px !important}
+}
+</style>
+</head>
+<body>
+<div style="--accent: #e11d74; background: #f2f6f9; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0a2f45">
+
+<div class="hero" style="position: relative; overflow: hidden; background: #050d12; padding: 0 24px 150px">
+<video class="bgvid" src="assets/hero-bg.mp4" autoplay muted loop playsinline aria-hidden="true" tabindex="-1" style="position: absolute; top: -2%; left: 72%; transform: translateX(-50%); height: 156%; max-height: 1280px; aspect-ratio: 9 / 16; object-fit: cover; -webkit-mask-image: linear-gradient(to right, transparent, #000 24%, #000 76%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 82%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent, #000 24%, #000 76%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 82%, transparent); mask-composite: intersect"></video>
+<div class="veil" aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(120deg, rgba(5,13,18,0.82) 0%, rgba(10,47,69,0.5) 50%, rgba(15,92,115,0.28) 100%)"></div>
+<div class="orbA" aria-hidden="true" style="position: absolute; top: -140px; left: -120px; width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(circle, rgba(27,133,127,0.55), transparent 68%); filter: blur(30px)"></div>
+<div class="orbB" aria-hidden="true" style="position: absolute; bottom: -80px; right: -100px; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle, rgba(225,29,116,0.32), transparent 68%); filter: blur(34px)"></div>
+<div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; background: linear-gradient(to bottom, rgba(242,246,249,0), #f2f6f9)"></div>
+
+<div style="position: relative; max-width: 1120px; margin: 0 auto">
+
+<div class="topbar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 26px 0">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="display: inline-flex; align-items: center; justify-content: center; width: 58px; height: 58px; border-radius: 50%; background: #ffffff; box-shadow: 0 6px 20px rgba(0,0,0,0.35), 0 0 0 4px rgba(255,255,255,0.18)"><img src="assets/logo.png" alt="Logo Starlite" width="34" height="34" style="display: block; width: 34px; height: auto"></span>
+<span style="display: flex; flex-direction: column; line-height: 1.15">
+<span style="font-size: 19px; font-weight: 800; letter-spacing: 3px; color: #ffffff">STARLITE</span>
+<span style="font-size: 10.500px; font-weight: 600; letter-spacing: 2px; color: #cfe3ea">VENDOR MANAGEMENT</span>
+</span>
+</div>
+<nav class="nav" aria-label="Navigasi utama" style="display: flex; align-items: center; gap: 6px">
+<a href="#dashboard" style="padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; color: #e3eef2">Dashboard</a>
+<a href="#portal" style="padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; color: #e3eef2">Portal &amp; Program</a>
+</nav>
+</div>
+
+<div class="herotext" style="text-align: center; padding: 64px 0 0">
+<div class="r1" style="display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22); font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: #ffffff">
+<span class="dot" style="width: 8px; height: 8px; border-radius: 50%; background: #4fe3c1"></span>
+<span>PORTAL TERPADU STARLITE</span>
+</div>
+<h1 class="r2" style="margin: 22px auto 0; max-width: 820px; font-size: clamp(34px, 5.400vw, 62px); line-height: 1.08; font-weight: 800; letter-spacing: -1.500px; color: #ffffff">Selamat datang di <span style="background: linear-gradient(100deg, #ff8fbf 0%, #ffb4d4 40%, #7fe8d4 100%); -webkit-background-clip: text; background-clip: text; color: transparent">Portal Dasboard VM</span></h1>
+<p class="r3" style="margin: 20px auto 0; max-width: 560px; font-size: 17px; line-height: 1.6; font-weight: 400; color: #d6e6ec">Semua dashboard dan portal Vendor Management Starlite dalam satu pintu masuk.</p>
+
+<div class="r4" style="max-width: 600px; margin: 38px auto 0; position: relative">
+<label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Cari dashboard</label>
+<input id="q" class="search" type="search" placeholder="Cari dashboard atau portal" style="box-sizing: border-box; width: 100%; height: 58px; border: 0; border-radius: 29px; padding: 0 62px 0 28px; background: rgba(255,255,255,0.94); font-family: inherit; font-size: 15.500px; font-weight: 500; color: #0a2f45; box-shadow: 0 14px 34px rgba(0,0,0,.28)">
+<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a2f45" stroke-width="2" stroke-linecap="round" style="position: absolute; right: 24px; top: 18px"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+</div>
+
+<div class="r5" role="group" aria-label="Filter kategori" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 22px 0 0">
+<button class="chip" type="button" data-cat="all" aria-pressed="true">Semua</button>
+<button class="chip" type="button" data-cat="dash" aria-pressed="false">Dashboard</button>
+<button class="chip" type="button" data-cat="portal" aria-pressed="false">Portal &amp; Program</button>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="main" style="max-width: 1120px; margin: 0 auto; padding: 8px 24px 72px">
+
+<section id="dashboard" style="display: block; margin: 0 0 48px; scroll-margin-top: 20px">
+<div style="display: flex; align-items: center; gap: 14px; margin: 0 0 22px">
+<h2 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px">Dashboard Monitoring</h2>
+<span style="height: 1px; flex: 1; background: linear-gradient(90deg, #c9d9e0, transparent)"></span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 22px">
+
+<a class="card" data-key="ftth" href="https://vendormanagement-ije.github.io/Dashboard-FTTH-Starlite-VM/" target="_blank" rel="noopener" style="display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; min-height: 232px; padding: 24px; position: relative; overflow: hidden; background: #ffffff; border: 1px solid #dfeaee; border-radius: 18px; box-shadow: 0 10px 28px rgba(8,38,58,.08); color: #0a2f45">
+<span style="display: flex; align-items: center; justify-content: space-between">
+<span class="ico" style="width: 54px; height: 54px; border-radius: 15px; background: linear-gradient(135deg, #0a2f45, #1b857f); display: inline-flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="7" r="3" stroke="#ff9cc6"/><circle cx="6" cy="25" r="3"/><circle cx="26" cy="25" r="3"/><path d="M16 10v6M16 16l-8 6.500M16 16l8 6.500"/></svg>
+</span>
+<span style="padding: 5px 11px; border-radius: 999px; background: #e4f2f1; color: #0f5c73; font-size: 11.500px; font-weight: 700">Dashboard</span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 7px">
+<span style="font-size: 18px; font-weight: 800; letter-spacing: -0.2px">FTTH Dashboard</span>
+<span style="font-size: 13.500px; line-height: 1.55; color: #4d5f6e">Dashboard FTTH Starlite</span>
+</span>
+<span class="cta" style="margin-top: auto; font-size: 13.500px; font-weight: 700">Buka dashboard <span class="arrow">&rarr;</span></span>
+</a>
+
+<a class="card" data-key="wo" href="https://starlite-monitoring.github.io/Dashboard-WO-Selesai/#dashboard" target="_blank" rel="noopener" style="display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; min-height: 232px; padding: 24px; position: relative; overflow: hidden; background: #ffffff; border: 1px solid #dfeaee; border-radius: 18px; box-shadow: 0 10px 28px rgba(8,38,58,.08); color: #0a2f45">
+<span style="display: flex; align-items: center; justify-content: space-between">
+<span class="ico" style="width: 54px; height: 54px; border-radius: 15px; background: linear-gradient(135deg, #0a2f45, #1b857f); display: inline-flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="23" rx="2"/><path d="M12 5V3h8v2"/><path d="M11 17l4 4 7-8" stroke="#ff9cc6"/></svg>
+</span>
+<span style="padding: 5px 11px; border-radius: 999px; background: #e4f2f1; color: #0f5c73; font-size: 11.500px; font-weight: 700">Dashboard</span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 7px">
+<span style="font-size: 18px; font-weight: 800; letter-spacing: -0.2px">WO Dashboard</span>
+<span style="font-size: 13.500px; line-height: 1.55; color: #4d5f6e">Dashboard work order selesai</span>
+</span>
+<span class="cta" style="margin-top: auto; font-size: 13.500px; font-weight: 700">Buka dashboard <span class="arrow">&rarr;</span></span>
+</a>
+
+<a class="card" data-key="vm" href="https://vendormanagementstarlite-cyber.github.io/VM_SpesialistDashbord/" target="_blank" rel="noopener" style="display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; min-height: 232px; padding: 24px; position: relative; overflow: hidden; background: #ffffff; border: 1px solid #dfeaee; border-radius: 18px; box-shadow: 0 10px 28px rgba(8,38,58,.08); color: #0a2f45">
+<span style="display: flex; align-items: center; justify-content: space-between">
+<span class="ico" style="width: 54px; height: 54px; border-radius: 15px; background: linear-gradient(135deg, #0a2f45, #1b857f); display: inline-flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="24" height="16" rx="2"/><path d="M12 11V8a2 2 0 012-2h4a2 2 0 012 2v3"/><path d="M4 18h24" stroke="#ff9cc6"/></svg>
+</span>
+<span style="padding: 5px 11px; border-radius: 999px; background: #e4f2f1; color: #0f5c73; font-size: 11.500px; font-weight: 700">Dashboard</span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 7px">
+<span style="font-size: 18px; font-weight: 800; letter-spacing: -0.2px">VM Dashboard</span>
+<span style="font-size: 13.500px; line-height: 1.55; color: #4d5f6e">Dashboard Vendor Management Specialist</span>
+</span>
+<span class="cta" style="margin-top: auto; font-size: 13.500px; font-weight: 700">Buka dashboard <span class="arrow">&rarr;</span></span>
+</a>
+
+<a class="card" data-key="apd" href="https://vendormanagementstarlite-cyber.github.io/Monitoring_APD/" target="_blank" rel="noopener" style="display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; min-height: 232px; padding: 24px; position: relative; overflow: hidden; background: #ffffff; border: 1px solid #dfeaee; border-radius: 18px; box-shadow: 0 10px 28px rgba(8,38,58,.08); color: #0a2f45">
+<span style="display: flex; align-items: center; justify-content: space-between">
+<span class="ico" style="width: 54px; height: 54px; border-radius: 15px; background: linear-gradient(135deg, #0a2f45, #1b857f); display: inline-flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4l10 4v7c0 6-4.200 10.400-10 13C10.200 25.400 6 21 6 15V8z"/><path d="M11.500 15.500l3.500 3.500 6-6.500" stroke="#ff9cc6"/></svg>
+</span>
+<span style="padding: 5px 11px; border-radius: 999px; background: #e4f2f1; color: #0f5c73; font-size: 11.500px; font-weight: 700">Dashboard</span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 7px">
+<span style="font-size: 18px; font-weight: 800; letter-spacing: -0.2px">Monitoring APD</span>
+<span style="font-size: 13.500px; line-height: 1.55; color: #4d5f6e">Pemantauan APD mitra</span>
+</span>
+<span class="cta" style="margin-top: auto; font-size: 13.500px; font-weight: 700">Buka dashboard <span class="arrow">&rarr;</span></span>
+</a>
+
+</div>
+</section>
+
+<section id="portal" style="display: block; margin: 0; scroll-margin-top: 20px">
+<div style="display: flex; align-items: center; gap: 14px; margin: 0 0 22px">
+<h2 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px">Portal &amp; Program</h2>
+<span style="height: 1px; flex: 1; background: linear-gradient(90deg, #c9d9e0, transparent)"></span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 22px">
+
+<a class="card" data-key="reward" href="https://vendormanagementstarlite-cyber.github.io/Starlite_Reward/" target="_blank" rel="noopener" style="display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; min-height: 232px; padding: 24px; position: relative; overflow: hidden; background: #ffffff; border: 1px solid #dfeaee; border-radius: 18px; box-shadow: 0 10px 28px rgba(8,38,58,.08); color: #0a2f45">
+<span style="display: flex; align-items: center; justify-content: space-between">
+<span class="ico" style="width: 54px; height: 54px; border-radius: 15px; background: linear-gradient(135deg, #0a2f45, #1b857f); display: inline-flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5h12v8a6 6 0 01-12 0z" stroke="#ff9cc6"/><path d="M10 8H5v2a4 4 0 004 4M22 8h5v2a4 4 0 01-4 4"/><path d="M16 19v5M11 27h10"/></svg>
+</span>
+<span style="padding: 5px 11px; border-radius: 999px; background: #fde7f1; color: #a3124f; font-size: 11.500px; font-weight: 700">Program</span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 7px">
+<span style="font-size: 18px; font-weight: 800; letter-spacing: -0.2px">Starlite Reward</span>
+<span style="font-size: 13.500px; line-height: 1.55; color: #4d5f6e">Program reward dan leaderboard mitra</span>
+</span>
+<span class="cta" style="margin-top: auto; font-size: 13.500px; font-weight: 700">Buka program <span class="arrow">&rarr;</span></span>
+</a>
+
+<a class="card" data-key="data" href="https://vendormanagementstarlite-cyber.github.io/Data-Pelanggan/" target="_blank" rel="noopener" style="display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; min-height: 232px; padding: 24px; position: relative; overflow: hidden; background: #ffffff; border: 1px solid #dfeaee; border-radius: 18px; box-shadow: 0 10px 28px rgba(8,38,58,.08); color: #0a2f45">
+<span style="display: flex; align-items: center; justify-content: space-between">
+<span class="ico" style="width: 54px; height: 54px; border-radius: 15px; background: linear-gradient(135deg, #0a2f45, #1b857f); display: inline-flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="16" cy="8" rx="9" ry="3.500" stroke="#ff9cc6"/><path d="M7 8v8c0 1.900 4 3.500 9 3.500s9-1.600 9-3.500V8"/><path d="M7 16v8c0 1.900 4 3.500 9 3.500s9-1.600 9-3.500v-8"/></svg>
+</span>
+<span style="padding: 5px 11px; border-radius: 999px; background: #e4f2f1; color: #0f5c73; font-size: 11.500px; font-weight: 700">Portal</span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 7px">
+<span style="font-size: 18px; font-weight: 800; letter-spacing: -0.2px">Portal Data Mitra</span>
+<span style="font-size: 13.500px; line-height: 1.55; color: #4d5f6e">Data pelanggan mitra</span>
+</span>
+<span class="cta" style="margin-top: auto; font-size: 13.500px; font-weight: 700">Buka portal <span class="arrow">&rarr;</span></span>
+</a>
+
+<a class="card" data-key="ont" href="https://vendormanagementstarlite-cyber.github.io/ONT_Dismental/" target="_blank" rel="noopener" style="display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; min-height: 232px; padding: 24px; position: relative; overflow: hidden; background: #ffffff; border: 1px solid #dfeaee; border-radius: 18px; box-shadow: 0 10px 28px rgba(8,38,58,.08); color: #0a2f45">
+<span style="display: flex; align-items: center; justify-content: space-between">
+<span class="ico" style="width: 54px; height: 54px; border-radius: 15px; background: linear-gradient(135deg, #0a2f45, #1b857f); display: inline-flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="18" width="24" height="8" rx="2"/><path d="M9 22h.01M13 22h.01"/><path d="M10 14a8.500 8.500 0 0112 0M13 10.500a4.200 4.200 0 016 0" stroke="#ff9cc6"/></svg>
+</span>
+<span style="padding: 5px 11px; border-radius: 999px; background: #e4f2f1; color: #0f5c73; font-size: 11.500px; font-weight: 700">Portal</span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 7px">
+<span style="font-size: 18px; font-weight: 800; letter-spacing: -0.2px">ONT Dismantle</span>
+<span style="font-size: 13.500px; line-height: 1.55; color: #4d5f6e">Data perangkat ONT dismantle</span>
+</span>
+<span class="cta" style="margin-top: auto; font-size: 13.500px; font-weight: 700">Buka portal <span class="arrow">&rarr;</span></span>
+</a>
+
+</div>
+</section>
+
+<p id="noResult" hidden style="margin: 40px 0 0; text-align: center; font-size: 15px; color: #4d5f6e">Tidak ada dashboard yang cocok dengan pencarian.</p>
+</div>
+
+<div style="background: #08202f; padding: 26px 24px">
+<div style="max-width: 1120px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 13px; color: #b9ccd6">
+<span style="font-weight: 700; letter-spacing: 2px; color: #ffffff">STARLITE <span style="font-weight: 500; letter-spacing: 1px; color: #b9ccd6">· Vendor Management</span></span>
+<span>&copy; 2026 Portal Dasboard VM</span>
+</div>
+</div>
+
+</div>
+
+<aside id="mp" class="mp" aria-label="Pemutar musik">
+<div class="mp-panel" id="mpPanel" role="group" aria-label="Pemutar musik">
+<div class="mp-head"><span>MUSIK</span><button class="mp-x" id="mpClose" type="button" aria-label="Tutup pemutar">&times;</button></div>
+<div class="mp-video"><div id="ytp"></div></div>
+<div class="mp-title" id="mpTitle">Memuat lagu...</div>
+<div class="mp-note" id="mpNote" role="status"></div>
+<label for="mpSeek" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Posisi lagu</label>
+<input id="mpSeek" type="range" min="0" max="100" value="0" step="0.1">
+<div class="mp-time"><span id="mpCur">0:00</span><span id="mpDur">0:00</span></div>
+<div class="mp-ctrl">
+<button id="mpPrev" type="button" aria-label="Lagu sebelumnya"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9.500 12z"/></svg></button>
+<button class="mp-play" id="mpPlay" type="button" aria-label="Putar"><svg id="mpIcoPlay" width="24" height="24" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg id="mpIcoPause" width="24" height="24" viewBox="0 0 24 24" fill="#fff" aria-hidden="true" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button>
+<button id="mpNext" type="button" aria-label="Lagu berikutnya"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l10.500-7z"/></svg></button>
+</div>
+<div class="mp-vol"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.500 8.500a5 5 0 010 7M18.500 5.500a9 9 0 010 13"/></svg><label for="mpVol" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Volume</label><input id="mpVol" type="range" min="0" max="100" value="70"></div>
+<ul class="mp-list" id="mpList" aria-label="Daftar lagu"></ul>
+</div>
+<button class="mp-fab" id="mpFab" type="button" aria-expanded="false" aria-controls="mpPanel" aria-label="Buka pemutar musik"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+</aside>
+<script>
+(function(){
+  var T={ftth:["dash","ftth dashboard dashboard ftth starlite"],wo:["dash","wo dashboard dashboard work order selesai"],vm:["dash","vm dashboard dashboard vendor management specialist"],apd:["dash","monitoring apd pemantauan apd mitra"],reward:["portal","starlite reward program reward dan leaderboard mitra"],data:["portal","portal data mitra data pelanggan mitra"],ont:["portal","ont dismantle data perangkat ont dismantle"]};
+  var q="",cat="all";
+  var cards=document.querySelectorAll(".card"),chips=document.querySelectorAll(".chip");
+  var secA=document.getElementById("dashboard"),secB=document.getElementById("portal"),none=document.getElementById("noResult");
+  function render(){
+    var a=0,b=0;
+    cards.forEach(function(c){var t=T[c.dataset.key];var ok=(!q||t[1].indexOf(q)!==-1)&&(cat==="all"||cat===t[0]);c.style.display=ok?"flex":"none";if(ok){if(t[0]==="dash")a++;else b++;}});
+    secA.style.display=a?"block":"none";secB.style.display=b?"block":"none";none.hidden=(a+b)>0;
+    chips.forEach(function(c){c.setAttribute("aria-pressed",c.dataset.cat===cat?"true":"false");});
+  }
+  document.getElementById("q").addEventListener("input",function(e){q=e.target.value.trim().toLowerCase();render();});
+  chips.forEach(function(c){c.addEventListener("click",function(){cat=c.dataset.cat;render();});});
+})();
+
+
+(function(){
+  /* Daftar lagu: tambah baris baru dengan ID video YouTube (bagian setelah youtu.be/ atau v=). */
+  var SONGS=[
+    {id:"OKee1M6tgBs",title:"Lagu Rock Barat Terbaik Sepanjang Masa"}
+  ];
+  var mp=document.getElementById("mp"),fab=document.getElementById("mpFab"),closeBtn=document.getElementById("mpClose");
+  var titleEl=document.getElementById("mpTitle"),noteEl=document.getElementById("mpNote"),seek=document.getElementById("mpSeek"),vol=document.getElementById("mpVol");
+  var curEl=document.getElementById("mpCur"),durEl=document.getElementById("mpDur"),list=document.getElementById("mpList");
+  var playBtn=document.getElementById("mpPlay"),icoPlay=document.getElementById("mpIcoPlay"),icoPause=document.getElementById("mpIcoPause");
+  var player=null,ready=false,idx=0,userPaused=false,dragging=false,started=false;
+  function fmt(t){t=Math.max(0,Math.floor(t||0));var m=Math.floor(t/60),s=t%60;return m+":"+(s<10?"0":"")+s;}
+  function setOpen(o){mp.classList.toggle("open",o);fab.setAttribute("aria-expanded",o?"true":"false");fab.setAttribute("aria-label",o?"Tutup pemutar musik":"Buka pemutar musik");}
+  fab.addEventListener("click",function(){setOpen(!mp.classList.contains("open"));});
+  closeBtn.addEventListener("click",function(){setOpen(false);fab.focus();});
+  function renderList(){
+    list.innerHTML="";
+    SONGS.forEach(function(sg,i){
+      var li=document.createElement("li"),b=document.createElement("button");b.type="button";
+      b.setAttribute("aria-current",i===idx?"true":"false");
+      var n=document.createElement("b");n.textContent=String(i+1);
+      var t=document.createElement("span");t.textContent=sg.title;
+      b.appendChild(n);b.appendChild(t);
+      b.addEventListener("click",function(){userPaused=false;load(i,true);});
+      li.appendChild(b);list.appendChild(li);
+    });
+    document.getElementById("mpPrev").style.visibility=document.getElementById("mpNext").style.visibility=SONGS.length>1?"visible":"hidden";
+  }
+  function setTitle(){titleEl.textContent=SONGS[idx].title;noteEl.textContent="";renderList();}
+  function setPlaying(p){
+    mp.classList.toggle("playing",p);
+    icoPlay.style.display=p?"none":"block";icoPause.style.display=p?"block":"none";
+    playBtn.setAttribute("aria-label",p?"Jeda":"Putar");
+  }
+  function load(i,play){
+    idx=(i+SONGS.length)%SONGS.length;setTitle();
+    if(!ready)return;
+    if(play)player.loadVideoById(SONGS[idx].id);else player.cueVideoById(SONGS[idx].id);
+  }
+  function next(){userPaused=false;load(idx+1,true);}
+  function prev(){userPaused=false;load(idx-1,true);}
+  document.getElementById("mpNext").addEventListener("click",next);
+  document.getElementById("mpPrev").addEventListener("click",prev);
+  playBtn.addEventListener("click",function(){
+    if(!ready)return;
+    var st=player.getPlayerState();
+    if(st===1){userPaused=true;player.pauseVideo();}else{userPaused=false;player.playVideo();}
+  });
+  vol.addEventListener("input",function(){if(ready)player.setVolume(+vol.value);});
+  seek.addEventListener("input",function(){dragging=true;if(ready){var d=player.getDuration()||0;curEl.textContent=fmt(d*seek.value/100);}});
+  seek.addEventListener("change",function(){if(ready){var d=player.getDuration()||0;player.seekTo(d*seek.value/100,true);}dragging=false;});
+  setInterval(function(){
+    if(!ready||dragging)return;
+    var d=player.getDuration()||0,c=player.getCurrentTime()||0;
+    curEl.textContent=fmt(c);durEl.textContent=fmt(d);
+    seek.value=d?(c/d*100):0;
+  },500);
+  function onStateChange(e){
+    var st=e.data;
+    setPlaying(st===1);
+    if(st===0){if(SONGS.length>1)next();else{player.seekTo(0);player.playVideo();}}
+  }
+  function onError(){
+    noteEl.textContent="Video ini tidak dapat diputar di sini.";
+    if(SONGS.length>1)setTimeout(next,1200);
+  }
+  window.onYouTubeIframeAPIReady=function(){
+    player=new YT.Player("ytp",{
+      width:"100%",height:"100%",videoId:SONGS[0].id,
+      playerVars:{autoplay:1,controls:0,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3,disablekb:1,fs:0},
+      events:{
+        onReady:function(){ready=true;player.setVolume(+vol.value);try{player.playVideo();}catch(e){}},
+        onStateChange:onStateChange,onError:onError
+      }
+    });
+  };
+  /* Browser memblokir suara otomatis: lagu mulai pada interaksi pertama pengguna. */
+  function firstGesture(){
+    if(started)return;started=true;
+    document.removeEventListener("pointerdown",firstGesture);document.removeEventListener("keydown",firstGesture);
+    if(ready&&!userPaused&&player.getPlayerState()!==1)player.playVideo();
+    else if(!ready){var t=setInterval(function(){if(ready){clearInterval(t);if(!userPaused)player.playVideo();}},300);setTimeout(function(){clearInterval(t);},8000);}
+  }
+  document.addEventListener("pointerdown",firstGesture);document.addEventListener("keydown",firstGesture);
+  setTitle();
+  var sc=document.createElement("script");sc.src="https://www.youtube.com/iframe_api";
+  sc.onerror=function(){titleEl.textContent=SONGS[0].title;noteEl.textContent="Pemutar tidak dapat dimuat. Periksa koneksi internet.";};
+  document.head.appendChild(sc);
+})();
+</script>
+</body>
+</html>
