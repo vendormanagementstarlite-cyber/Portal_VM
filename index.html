@@ -237,8 +237,6 @@ html[data-theme="dark"] .rpill:hover{border-color:#2e6580}
 </span>
 </div>
 <nav class="nav" aria-label="Navigasi utama" style="display: flex; align-items: center; gap: 6px">
-<a href="#dashboard" style="padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; color: #e3eef2">Dashboard</a>
-<a href="#portal" style="padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; color: #e3eef2">Portal &amp; Program</a>
 <button id="themeBtn" class="themebtn" type="button" aria-label="Ganti ke mode gelap"><svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.800A9 9 0 1111.200 3a7 7 0 009.800 9.800z"/></svg><svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.900 4.900l1.400 1.400M17.700 17.700l1.400 1.400M2 12h2M20 12h2M4.900 19.100l1.400-1.400M17.700 6.300l1.400-1.400"/></svg></button>
 <button id="installBtn" class="themebtn installbtn" type="button" hidden>Pasang aplikasi</button>
 </nav>
@@ -498,8 +496,20 @@ html[data-theme="dark"] .rpill:hover{border-color:#2e6580}
   tb.addEventListener("click",function(){setTheme(root.getAttribute("data-theme")==="dark"?"light":"dark");});
   /* pasang sebagai aplikasi */
   var deferred=null,ib=document.getElementById("installBtn");
+  var standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+  if(!standalone){ib.hidden=false;}
+  var tip=document.createElement("div");
+  tip.setAttribute("role","status");
+  tip.style.cssText="position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);max-width:min(92vw,420px);padding:14px 18px;border-radius:14px;background:#0a2f45;color:#fff;font:600 14px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;z-index:80;text-align:center";
+  document.body.appendChild(tip);
+  var tipT=0;
+  function showTip(m){tip.textContent=m;tip.style.opacity="1";tip.style.transform="translate(-50%,0)";clearTimeout(tipT);tipT=setTimeout(function(){tip.style.opacity="0";tip.style.transform="translate(-50%,20px)";},7000);}
   window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;ib.hidden=false;});
-  ib.addEventListener("click",function(){if(!deferred)return;deferred.prompt();deferred.userChoice.then(function(){deferred=null;ib.hidden=true;});});
+  ib.addEventListener("click",function(){
+    if(deferred){var d=deferred;deferred=null;d.prompt();d.userChoice.then(function(r){if(r&&r.outcome==="accepted"){ib.hidden=true;}}).catch(function(){});return;}
+    var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    showTip(ios?"Di Safari: ketuk tombol Bagikan, lalu pilih \u201cTambah ke Layar Utama\u201d.":"Buka menu \u22EE di pojok kanan atas Chrome, lalu pilih \u201cPasang aplikasi\u201d atau \u201cTambahkan ke layar utama\u201d. Jika sudah terpasang, buka dari ikon di layar utama.");
+  });
   window.addEventListener("appinstalled",function(){ib.hidden=true;});
   if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
 })();
