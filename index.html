@@ -214,6 +214,31 @@ html[data-theme="dark"] .fav:hover{background:rgba(255,255,255,.12)}
 html[data-theme="dark"] .rpill:hover{border-color:#2e6580}
 }
 @media (prefers-reduced-motion: reduce){.nav a::after,.themebtn svg,.chip,.fav,.fav svg,.rpill,.mp-fab,.mp-x,.mp-ctrl button,.mp-list button{transition:none !important}.chip:hover,.themebtn:hover,.rpill:hover,.mp-fab:hover,.mp-x:hover,.mp-ctrl button:hover,.mp-list button:hover,.fav:hover,.fav:hover svg,.themebtn:hover svg{transform:none !important}}
+
+/* ===== efek tambahan ===== */
+#fxNet{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.9}
+#fxProg{position:fixed;left:0;top:0;height:3px;width:100%;background:linear-gradient(90deg,#1b857f,#e11d74);transform:scaleX(0);transform-origin:left;z-index:90;pointer-events:none}
+#fxTop{position:fixed;right:26px;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(10,47,69,.92);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;z-index:49;box-shadow:0 10px 24px rgba(5,13,18,.35);opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s,background .2s ease}
+#fxTop.show{opacity:1;visibility:visible;transform:none;transition:opacity .25s ease,transform .25s ease,background .2s ease}
+#fxTop:focus-visible{outline:3px solid #fff;outline-offset:2px}
+#fxTop:active{transform:scale(.94)}
+@media (hover:hover){#fxTop:hover{background:#1b857f;transform:translateY(-3px)}}
+@media (max-width:600px){#fxTop{right:18px;bottom:calc(80px + env(safe-area-inset-bottom,0px))}}
+.caret{display:inline-block;width:2px;height:1.05em;margin-left:3px;vertical-align:-.15em;background:#7fe8d4;animation:blink .9s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.stats{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:30px 0 0;animation:fadeUp .8s cubic-bezier(.2,.7,.2,1) .7s backwards}
+.stat{display:inline-flex;align-items:baseline;gap:8px;padding:10px 18px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#d6e6ec;font-size:13px;font-weight:600}
+.stat b{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.rv{opacity:0;translate:0 26px;animation:none !important}
+.rv.in{opacity:1;translate:0 0;transition:opacity .7s cubic-bezier(.2,.7,.2,1),translate .7s cubic-bezier(.2,.7,.2,1)}
+@media (hover:hover) and (pointer:fine){
+.cw>.card{transition:box-shadow .28s ease,border-color .28s ease,transform .18s ease-out;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));will-change:transform}
+.cw>.card.tilting{transition:box-shadow .28s ease,border-color .28s ease,transform .06s linear}
+.cw:hover>.card{background-image:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(27,133,127,.13),transparent 62%) !important}
+html[data-theme="dark"] .cw:hover>.card{background-image:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(127,232,212,.14),transparent 62%) !important}
+}
+@media (max-width:600px){.stats{gap:8px;margin-top:24px}.stat{padding:8px 12px;font-size:12px}.stat b{font-size:20px}}
+@media (prefers-reduced-motion: reduce){.caret{animation:none}.stats{animation:none}.rv{opacity:1;translate:none}#fxProg{display:none}.cw>.card{transform:none !important}}
 </style>
 </head>
 <body>
@@ -618,6 +643,83 @@ html[data-theme="dark"] .rpill:hover{border-color:#2e6580}
   var sc=document.createElement("script");sc.src="https://www.youtube.com/iframe_api";
   sc.onerror=function(){titleEl.textContent=SONGS[0].title;noteEl.textContent="Pemutar tidak dapat dimuat. Periksa koneksi internet.";};
   document.head.appendChild(sc);
+})();
+</script>
+<script>
+(function(){
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var hero=document.querySelector(".hero");
+  /* 1. progress bar + tombol ke atas */
+  var prog=document.createElement("div");prog.id="fxProg";prog.setAttribute("aria-hidden","true");document.body.appendChild(prog);
+  var top=document.createElement("button");top.id="fxTop";top.type="button";top.setAttribute("aria-label","Kembali ke atas");
+  top.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  document.body.appendChild(top);
+  top.addEventListener("click",function(){window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});});
+  var tick=false;
+  function onScroll(){if(tick)return;tick=true;requestAnimationFrame(function(){tick=false;var h=document.documentElement,m=h.scrollHeight-h.clientHeight,y=window.pageYOffset||h.scrollTop;prog.style.transform="scaleX("+(m>0?Math.min(1,y/m):0)+")";top.classList.toggle("show",y>520);});}
+  window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+  /* 2. muncul bertahap saat digulir */
+  if(!reduce&&"IntersectionObserver" in window){
+    var items=[].slice.call(document.querySelectorAll(".main .sechead,.main section>div:first-child,.cw"));
+    var io=new IntersectionObserver(function(es){es.forEach(function(en){
+      if(!en.isIntersecting)return;io.unobserve(en.target);var el=en.target;
+      var d=el.classList.contains("cw")?(([].indexOf.call(el.parentNode.children,el)%4)*90):0;
+      el.style.transitionDelay=d+"ms";
+      requestAnimationFrame(function(){el.classList.add("in");});
+      setTimeout(function(){el.style.animation="none";el.classList.remove("rv","in");el.style.transitionDelay="";},900+d);
+    });},{rootMargin:"0px 0px -8% 0px",threshold:.05});
+    items.forEach(function(el){if(el.getBoundingClientRect().top>window.innerHeight*0.92){el.classList.add("rv");io.observe(el);}});
+  }
+  /* 3. kartu miring 3D + sorotan cahaya */
+  if(!reduce&&window.matchMedia&&matchMedia("(hover:hover) and (pointer:fine)").matches){
+    document.querySelectorAll(".cw").forEach(function(w){
+      var c=w.querySelector(".card");if(!c)return;
+      w.addEventListener("pointermove",function(e){
+        var r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+        c.classList.add("tilting");
+        c.style.setProperty("--ry",((x-.5)*7).toFixed(2)+"deg");
+        c.style.setProperty("--rx",((.5-y)*6).toFixed(2)+"deg");
+        c.style.setProperty("--mx",(x*100).toFixed(1)+"%");c.style.setProperty("--my",(y*100).toFixed(1)+"%");
+      });
+      w.addEventListener("pointerleave",function(){c.classList.remove("tilting");c.style.setProperty("--rx","0deg");c.style.setProperty("--ry","0deg");});
+    });
+  }
+  /* 4. subjudul mengetik */
+  var p=document.querySelector(".hero p.r3");
+  if(p&&!reduce){
+    var full=p.textContent.trim();p.style.minHeight=p.offsetHeight+"px";p.setAttribute("aria-label",full);
+    var span=document.createElement("span");span.setAttribute("aria-hidden","true");var caret=document.createElement("i");caret.className="caret";
+    p.textContent="";p.appendChild(span);p.appendChild(caret);
+    var i=0;setTimeout(function step(){i+=1;span.textContent=full.slice(0,i);if(i<full.length){setTimeout(step,22);}else{setTimeout(function(){caret.remove();p.style.minHeight="";},1600);}},750);
+  }
+  /* 6. partikel jaringan di hero */
+  if(hero&&!reduce){
+    var cv=document.createElement("canvas");cv.id="fxNet";cv.setAttribute("aria-hidden","true");
+    hero.insertBefore(cv,hero.querySelector(".fade"));
+    var ctx=cv.getContext("2d"),W=0,H=0,dpr=1,pts=[],mx=-999,my=-999,run=true,vis=true,small=window.innerWidth<700;
+    function size(){dpr=Math.min(window.devicePixelRatio||1,2);W=hero.clientWidth;H=hero.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+      var n=Math.min(small?26:58,Math.round(W*H/(small?20000:24000)));pts=[];
+      for(var i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.3+.8});}
+    size();window.addEventListener("resize",function(){small=window.innerWidth<700;size();});
+    hero.addEventListener("pointermove",function(e){var r=hero.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top;});
+    hero.addEventListener("pointerleave",function(){mx=my=-999;});
+    var LD=small?95:125;
+    function frame(){
+      if(run&&vis){
+        ctx.clearRect(0,0,W,H);
+        for(var i=0;i<pts.length;i++){var a=pts[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;
+          for(var j=i+1;j<pts.length;j++){var b=pts[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);
+            if(d<LD){ctx.strokeStyle="rgba(127,232,212,"+(0.22*(1-d/LD)).toFixed(3)+")";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+          var mdx=a.x-mx,mdy=a.y-my,md=Math.sqrt(mdx*mdx+mdy*mdy);
+          if(md<150){ctx.strokeStyle="rgba(255,143,191,"+(0.4*(1-md/150)).toFixed(3)+")";ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(mx,my);ctx.stroke();}
+          ctx.fillStyle="rgba(190,245,235,.7)";ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,6.2832);ctx.fill();}
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    document.addEventListener("visibilitychange",function(){run=!document.hidden;});
+    if("IntersectionObserver" in window){new IntersectionObserver(function(es){vis=es[0].isIntersecting;}).observe(hero);}
+  }
 })();
 </script>
 </body>
