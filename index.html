@@ -252,6 +252,34 @@ html[data-theme="dark"] .cw:hover>.card{background-image:radial-gradient(260px c
 .nav .installbtn::before{content:"";position:absolute;inset:0;background:center/22px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11M7 11l5 5 5-5M5 20h14'/%3E%3C/svg%3E")}
 }
 @media (max-width:340px){.topbar>div:first-child>span:last-child span:last-child{display:none}}
+
+/* ===== umpan balik sentuh (HP / aplikasi) ===== */
+.card{-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.card:active{transform:scale(.97) !important;transition:transform .08s ease-out !important}
+.card .rip{position:absolute;border-radius:50%;pointer-events:none;background:rgba(27,133,127,.28);transform:scale(0);animation:rip .65s ease-out forwards;z-index:1}
+html[data-theme="dark"] .card .rip{background:rgba(127,232,212,.25)}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+.card .openov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(10,47,69,.92);color:#fff;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .15s ease;z-index:3;text-align:center;padding:0 16px}
+.card.opening .openov{opacity:1}
+.card .spin{width:20px;height:20px;border-radius:50%;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.card .rip{display:none}.card .spin{animation-duration:1.6s}}
+
+/* ===== umpan balik sentuhan (HP / aplikasi terpasang) ===== */
+.card{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.cw>.card{transition:box-shadow .28s ease,border-color .28s ease,transform .16s ease-out}
+@media (hover:none){
+.cw:active>.card{transform:scale(.965);box-shadow:0 4px 12px rgba(8,38,58,.18) !important}
+.cw:active{transform:none}
+}
+.card.opening{border-color:var(--accent) !important;box-shadow:0 0 0 3px rgba(225,29,116,.35),0 14px 30px rgba(8,38,58,.2) !important}
+.card.opening .arrow{animation:nudge .7s ease-in-out infinite alternate}
+@keyframes nudge{from{transform:translateX(0)}to{transform:translateX(8px)}}
+#fxOpen{white-space:nowrap;position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);display:flex;align-items:center;gap:12px;max-width:min(92vw,420px);padding:13px 20px;border-radius:999px;background:#0a2f45;color:#fff;font:700 14px/1.3 'Plus Jakarta Sans',system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:95}
+#fxOpen.show{opacity:1;transform:translate(-50%,0)}
+#fxOpen i{flex:none;width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#ff8fbf;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.card.opening .arrow,#fxOpen i{animation:none}}
 </style>
 </head>
 <body>
@@ -564,7 +592,7 @@ html[data-theme="dark"] .cw:hover>.card{background-image:radial-gradient(260px c
     showTip(ios?"Di Safari: ketuk tombol Bagikan, lalu pilih \u201cTambah ke Layar Utama\u201d.":"Buka menu \u22EE di pojok kanan atas Chrome, lalu pilih \u201cPasang aplikasi\u201d atau \u201cTambahkan ke layar utama\u201d. Jika sudah terpasang, buka dari ikon di layar utama.");
   });
   window.addEventListener("appinstalled",function(){ib.hidden=true;});
-  if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
+  if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){var hadSW=!!navigator.serviceWorker.controller,rl=false;navigator.serviceWorker.addEventListener("controllerchange",function(){if(hadSW&&!rl){rl=true;location.reload();}});window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").then(function(r){try{r.update();}catch(e){}}).catch(function(){});});}
 })();
 
 
@@ -733,6 +761,48 @@ html[data-theme="dark"] .cw:hover>.card{background-image:radial-gradient(260px c
     document.addEventListener("visibilitychange",function(){run=!document.hidden;});
     if("IntersectionObserver" in window){new IntersectionObserver(function(es){vis=es[0].isIntersecting;}).observe(hero);}
   }
+})();
+</script>
+<script>
+(function(){
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var opened=null,timer=0;
+  function clear(){if(opened){opened.classList.remove("opening");opened=null;}clearTimeout(timer);}
+  document.querySelectorAll(".cw").forEach(function(w){
+    var c=w.querySelector(".card");if(!c)return;
+    var ov=document.createElement("span");ov.className="openov";ov.setAttribute("aria-hidden","true");
+    var sp=document.createElement("i");sp.className="spin";var tx=document.createElement("span");
+    var ttl=c.querySelector('span[style*="font-size: 18px"]');tx.textContent="Membuka "+(ttl?ttl.textContent:"halaman")+"\u2026";
+    ov.appendChild(sp);ov.appendChild(tx);c.appendChild(ov);
+    c.addEventListener("pointerdown",function(e){
+      if(reduce)return;
+      var r=c.getBoundingClientRect(),d=Math.max(r.width,r.height)*2.2;
+      var s=document.createElement("span");s.className="rip";
+      s.style.cssText="width:"+d+"px;height:"+d+"px;left:"+(e.clientX-r.left-d/2)+"px;top:"+(e.clientY-r.top-d/2)+"px";
+      c.appendChild(s);setTimeout(function(){s.remove();},700);
+    });
+    c.addEventListener("click",function(){
+      clear();opened=c;c.classList.add("opening");
+      timer=setTimeout(clear,3500);
+    });
+  });
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)clear();});
+  window.addEventListener("pageshow",clear);
+})();
+</script>
+<script>
+(function(){
+  /* umpan balik langsung saat kartu diketuk: efek + "Membuka ..." */
+  var t=document.createElement("div");t.id="fxOpen";t.setAttribute("role","status");t.innerHTML="<i></i><span></span>";document.body.appendChild(t);
+  var tm=0,cur=null;
+  document.addEventListener("click",function(e){
+    var a=e.target.closest&&e.target.closest("a.card");if(!a)return;
+    var n=a.querySelector('span[style*="font-size: 18px"]');
+    t.lastChild.textContent="Membuka "+(n?n.textContent:"halaman")+"\u2026";
+    if(cur)cur.classList.remove("opening");cur=a;a.classList.add("opening");t.classList.add("show");
+    clearTimeout(tm);tm=setTimeout(function(){t.classList.remove("show");if(cur){cur.classList.remove("opening");cur=null;}},3500);
+  },true);
+  document.addEventListener("visibilitychange",function(){if(document.hidden){return;}t.classList.remove("show");if(cur){cur.classList.remove("opening");cur=null;}});
 })();
 </script>
 </body>
