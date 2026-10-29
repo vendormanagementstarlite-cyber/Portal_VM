@@ -161,7 +161,6 @@ html[data-theme="dark"] .foot{background:#050e14 !important}
 @media (max-width:600px){
 .hero{padding:0 20px 110px !important}
 .topbar{padding:18px 0 !important}
-.nav{width:100%}
 .nav a{padding:12px 14px !important;font-size:13.5px !important}
 .herotext{padding:34px 0 0 !important}
 .hero h1{font-size:36px !important;letter-spacing:-1px !important;margin-top:18px !important}
@@ -239,6 +238,20 @@ html[data-theme="dark"] .cw:hover>.card{background-image:radial-gradient(260px c
 }
 @media (max-width:600px){.stats{gap:8px;margin-top:24px}.stat{padding:8px 12px;font-size:12px}.stat b{font-size:20px}}
 @media (prefers-reduced-motion: reduce){.caret{animation:none}.stats{animation:none}.rv{opacity:1;translate:none}#fxProg{display:none}.cw>.card{transform:none !important}}
+
+/* ===== topbar rapi di HP ===== */
+@media (max-width:600px){
+.topbar{flex-wrap:nowrap !important;gap:10px !important;padding:16px 0 !important}
+.topbar>div:first-child{min-width:0;gap:10px !important}
+.topbar>div:first-child>span:first-child{width:48px !important;height:48px !important;flex:none}
+.topbar>div:first-child>span:first-child img{width:28px !important}
+.topbar>div:first-child>span:last-child span:first-child{font-size:16px !important;letter-spacing:2.2px !important}
+.topbar>div:first-child>span:last-child span:last-child{font-size:9px !important;letter-spacing:1.4px !important;white-space:nowrap}
+.nav{width:auto !important;flex:none;gap:8px !important}
+.nav .installbtn{width:44px;padding:0;margin-left:0;font-size:0;line-height:0;color:transparent;position:relative}
+.nav .installbtn::before{content:"";position:absolute;inset:0;background:center/22px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11M7 11l5 5 5-5M5 20h14'/%3E%3C/svg%3E")}
+}
+@media (max-width:340px){.topbar>div:first-child>span:last-child span:last-child{display:none}}
 </style>
 </head>
 <body>
@@ -263,7 +276,7 @@ html[data-theme="dark"] .cw:hover>.card{background-image:radial-gradient(260px c
 </div>
 <nav class="nav" aria-label="Navigasi utama" style="display: flex; align-items: center; gap: 6px">
 <button id="themeBtn" class="themebtn" type="button" aria-label="Ganti ke mode gelap"><svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.800A9 9 0 1111.200 3a7 7 0 009.800 9.800z"/></svg><svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.900 4.900l1.400 1.400M17.700 17.700l1.400 1.400M2 12h2M20 12h2M4.900 19.100l1.400-1.400M17.700 6.300l1.400-1.400"/></svg></button>
-<button id="installBtn" class="themebtn installbtn" type="button" hidden>Pasang aplikasi</button>
+<button id="installBtn" class="themebtn installbtn" type="button" aria-label="Pasang aplikasi" hidden>Pasang aplikasi</button>
 </nav>
 </div>
 
