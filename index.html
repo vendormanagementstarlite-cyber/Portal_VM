@@ -280,6 +280,10 @@ html[data-theme="dark"] .card .rip{background:rgba(127,232,212,.25)}
 #fxOpen i{flex:none;width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#ff8fbf;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.card.opening .arrow,#fxOpen i{animation:none}}
+
+/* pembungkus pemutar musik tidak boleh menangkap sentuhan: hanya tombol & panel terbuka */
+.mp{pointer-events:none !important}
+.mp-fab,.mp.open .mp-panel{pointer-events:auto !important}
 </style>
 </head>
 <body>
