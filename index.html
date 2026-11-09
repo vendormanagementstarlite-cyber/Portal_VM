@@ -284,6 +284,19 @@ html[data-theme="dark"] .card .rip{background:rgba(127,232,212,.25)}
 /* pembungkus pemutar musik tidak boleh menangkap sentuhan: hanya tombol & panel terbuka */
 .mp{pointer-events:none !important}
 .mp-fab,.mp.open .mp-panel{pointer-events:auto !important}
+
+/* ===== latar bawah: satu logo M besar di tengah ===== */
+.lower{position:relative;overflow:hidden;background:linear-gradient(180deg,#f4f8fa 0%,#e9f1f5 100%)}
+.lower>.main{position:relative;z-index:1}
+.bgm{position:absolute;inset:0;pointer-events:none;z-index:0}
+.bgm::before{content:"";position:absolute;left:50%;top:50%;width:min(760px,92vw);aspect-ratio:1304/1316;transform:translate(-50%,-50%);background:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMzA0IDEzMTYiPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzFiODU3ZiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBhMmY0NSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxwYXRoIGQ9Ik00MjEgMCBMMjE2IDI4NCBMMjM3IDM4OSBMMjA1IDQxMCBMMSA2OTEgTDAgNzAzIEwzMDcgMTMxNSBMMzE2IDEzMTUgTDMxNCA3MjggTDQ3MCAxMTU0IEw0NzQgMTE1NyBMODMxIDExNTYgTDk4OSA3MjggTDk4NyAxMzE1IEw5OTYgMTMxNSBMMTMwMyA3MDMgTDEzMDMgNjkzIEwxMDk4IDQxMCBMMTA2NiAzODkgTDEwODcgMjg0IEw4ODMgMSBMODczIDAgTDY2MSA3NTMgTDY1MSA3ODIgTDQzMCAwWiIgZmlsbD0idXJsKCNnKSIgZmlsbC1vcGFjaXR5PSIuMTYiLz48L3N2Zz4=) center/contain no-repeat}
+.bgm::after{content:"";position:absolute;inset:0;background:radial-gradient(640px 420px at 50% 50%,rgba(27,133,127,.10),transparent 72%)}
+.lower .card{background:rgba(255,255,255,.82) !important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+html[data-theme="dark"] .lower{background:linear-gradient(180deg,#07141c 0%,#061219 100%)}
+html[data-theme="dark"] .bgm::before{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMzA0IDEzMTYiPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzdmZThkNCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzFiODU3ZiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxwYXRoIGQ9Ik00MjEgMCBMMjE2IDI4NCBMMjM3IDM4OSBMMjA1IDQxMCBMMSA2OTEgTDAgNzAzIEwzMDcgMTMxNSBMMzE2IDEzMTUgTDMxNCA3MjggTDQ3MCAxMTU0IEw0NzQgMTE1NyBMODMxIDExNTYgTDk4OSA3MjggTDk4NyAxMzE1IEw5OTYgMTMxNSBMMTMwMyA3MDMgTDEzMDMgNjkzIEwxMDk4IDQxMCBMMTA2NiAzODkgTDEwODcgMjg0IEw4ODMgMSBMODczIDAgTDY2MSA3NTMgTDY1MSA3ODIgTDQzMCAwWiIgZmlsbD0idXJsKCNnKSIgZmlsbC1vcGFjaXR5PSIuMjYiLz48L3N2Zz4=)}
+html[data-theme="dark"] .bgm::after{background:radial-gradient(640px 420px at 50% 50%,rgba(27,133,127,.18),transparent 72%)}
+html[data-theme="dark"] .lower .card{background:rgba(14,39,54,.78) !important}
+@media (max-width:600px){.bgm::before{width:120vw}}
 </style>
 </head>
 <body>
@@ -300,7 +313,7 @@ html[data-theme="dark"] .card .rip{background:rgba(127,232,212,.25)}
 
 <div class="topbar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 26px 0">
 <div style="display: flex; align-items: center; gap: 12px">
-<span style="display: inline-flex; align-items: center; justify-content: center; width: 58px; height: 58px; border-radius: 50%; background: #ffffff; box-shadow: 0 6px 20px rgba(0,0,0,0.35), 0 0 0 4px rgba(255,255,255,0.18)"><img src="assets/logo.png" alt="Logo Starlite" width="34" height="34" style="display: block; width: 34px; height: auto"></span>
+<span style="display: inline-flex; align-items: center; justify-content: center; width: 58px; height: 58px; border-radius: 50%; background: #ffffff; box-shadow: 0 6px 20px rgba(0,0,0,0.35), 0 0 0 4px rgba(255,255,255,0.18)"><img src="assets/logo.png" alt="Logo Starlite" width="32" height="32" style="display: block; width: 32px; height: auto"></span>
 <span style="display: flex; flex-direction: column; line-height: 1.15">
 <span style="font-size: 19px; font-weight: 800; letter-spacing: 3px; color: #ffffff">STARLITE</span>
 <span style="font-size: 10.500px; font-weight: 600; letter-spacing: 2px; color: #cfe3ea">VENDOR MANAGEMENT</span>
@@ -337,6 +350,7 @@ html[data-theme="dark"] .card .rip{background:rgba(127,232,212,.25)}
 </div>
 </div>
 
+<div class="lower"><div class="bgm" aria-hidden="true"></div>
 <div class="main" style="max-width: 1120px; margin: 0 auto; padding: 8px 24px 72px">
 
 <section id="recent" style="display: none; margin: 0 0 44px">
@@ -515,6 +529,7 @@ html[data-theme="dark"] .card .rip{background:rgba(127,232,212,.25)}
 </section>
 
 <p id="noResult" hidden style="margin: 40px 0 0; text-align: center; font-size: 15px; color: #4d5f6e">Tidak ada dashboard yang cocok dengan pencarian.</p>
+</div>
 </div>
 
 <div class="foot" style="background: #08202f; padding: 26px 24px">
