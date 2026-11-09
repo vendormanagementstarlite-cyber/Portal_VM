@@ -1,5 +1,5 @@
 /* Service worker sederhana: membuat portal bisa dipasang dan membuka cangkangnya saat koneksi buruk. */
-var CACHE = "portal-vm-v2";
+var CACHE = "portal-vm-v3";
 var SHELL = ["./", "index.html", "manifest.webmanifest", "assets/logo.png", "assets/icon-192.png", "assets/icon-512.png"];
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));
